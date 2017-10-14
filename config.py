@@ -29,6 +29,7 @@ Excited without bugs::
 
 * author: Nasy
 * date: Oct 13, 2017
+* update: Oct 15, 2017
 * email: sy_n@me.com
 * file: config.py
 * license: MIT
@@ -42,12 +43,12 @@ def settings() -> Dict[str, Any]:
     """Get settings."""
     return {
         "store": True,
-        "file": "./stores",
+        "file": "./store.json",
         "pages": 10,
         "filter": {
             "min_width": 1440,
             "min_height": 0,
-            "min_w2h": 1 / 1,
+            "min_w2h": 5 / 4,
             "max_w2h": 3 / 1,
             "tags": {"漫画"}
         }

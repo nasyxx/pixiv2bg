@@ -37,12 +37,13 @@ Copyright © 2017 by Nasy. All Rights Reserved.
 """
 import asyncio
 import os
-from typing import Any, Dict, Generator, Set
+from typing import Any, Dict, Generator
 
 import aiohttp
 import uvloop
 from tqdm import tqdm
 
+import ujson as json
 from config import settings
 
 URL = "https://api.pixiv.moe/v1/ranking?page="
@@ -88,32 +89,31 @@ async def fetch_illust(url: str, title: str):
                     f.write(chunk)
 
 
-async def add_illust(illust: Dict[str, Any], stores: Set[int], t: Any):
+async def add_illust(illust: Dict[str, Any], stores: Dict[str, Any],
+                     t: Any) -> Dict[str, Any]:
     """Add illusts."""
-    if ((0 in stores or illust["work"]["id"] not in stores) and
+    if ((not stores or illust["work"]["id"] not in stores) and
             await illusts_filter(illust)):
         await fetch_illust(
             illust["work"]["image_urls"]["large"], illust["work"]["title"]
         )
         t.update()
-        return illust["work"]["id"]
+        return illust["work"]
     t.update()
-    return 0
+    return {"id": None}
 
 
 def main() -> None:
     """Run this task."""
-    stores = set()  # type: Set[int]
-    add = stores.add
+    stores = {}  # type: Dict[str, Any]
     if SETTINGS.get("store", True):
         try:
             with open(SETTINGS["file"]) as s:
-                for i in s.read().split("\n")[:-1]:
-                    add(int(i))
+                stores = json.load(s)  # pylint: disable=E1101
         except FileNotFoundError:
-            add(0)
+            pass
     else:
-        add(0)
+        pass
 
     loop = uvloop.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -141,10 +141,10 @@ def main() -> None:
     if SETTINGS["store"]:
         with open(SETTINGS["file"], "w") as f:
             for task in tasks:
-                stores.add(task.result())
-            for store in stores:
-                if store:
-                    f.write(str(store) + "\n")
+                result = task.result()
+                if result["id"]:
+                    stores[result["id"]] = result
+            json.dump(stores, f)  # pylint: disable=E1101
 
 
 if __name__ == "__main__":
