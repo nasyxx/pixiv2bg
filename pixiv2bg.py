@@ -75,30 +75,39 @@ async def fetch_page(page: int = 1) -> Dict[str, Any]:
 async def fetch_illust(url: str, title: str):
     """Fetch illusts."""
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as res:
-            try:
-                os.mkdir("pictures")
-            except FileExistsError:
-                pass
-            with open((f"pictures/{title.replace('/','-')}."
-                       f"{url[-4:].split('.')[-1]}"), "wb") as f:
+        try:
+            async with session.get(url,
+                                   proxy = "http://127.0.0.1:6152") as res:
+                try:
+                    os.mkdir("pictures")
+                except FileExistsError:
+                    pass
+                chunks = b""
                 while True:
                     chunk = await res.content.read(5)
                     if not chunk:
                         break
-                    f.write(chunk)
+                    chunks = chunks + chunk
+        except asyncio.TimeoutError:
+            return
+        with open((f"pictures/{title.replace('/','-')}."
+                   f"{url[-4:].split('.')[-1]}"), "wb") as f:
+            f.write(chunks)
 
 
 async def add_illust(illust: Dict[str, Any], stores: Dict[str, Any],
                      t: Any) -> Dict[str, Any]:
     """Add illusts."""
-    if ((not stores or illust["work"]["id"] not in stores) and
+    if ((not stores or str(illust["work"]["id"]) not in stores) and
             await illusts_filter(illust)):
-        await fetch_illust(
-            illust["work"]["image_urls"]["large"], illust["work"]["title"]
-        )
-        t.update()
-        return illust["work"]
+        try:
+            await fetch_illust(
+                illust["work"]["image_urls"]["large"], illust["work"]["title"]
+            )
+            t.update()
+            return illust["work"]
+        except aiohttp.client_exceptions.ServerDisconnectedError:
+            pass
     t.update()
     return {"id": None}
 
@@ -111,6 +120,8 @@ def main() -> None:
             with open(SETTINGS["file"]) as s:
                 stores = json.load(s)  # pylint: disable=E1101
         except FileNotFoundError:
+            pass
+        except ValueError:
             pass
     else:
         pass
@@ -139,12 +150,13 @@ def main() -> None:
         ]
         loop.run_until_complete(asyncio.wait(tasks))
     if SETTINGS["store"]:
-        with open(SETTINGS["file"], "w") as f:
+        with open(SETTINGS["file"] + ".temp", "w") as f:
             for task in tasks:
                 result = task.result()
                 if result["id"]:
                     stores[result["id"]] = result
             json.dump(stores, f)  # pylint: disable=E1101
+        os.replace(SETTINGS["file"] + ".temp", SETTINGS["file"])
 
 
 if __name__ == "__main__":

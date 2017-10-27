@@ -28,28 +28,47 @@ Excited without bugs::
     |  ___|______|______|______|______|______|____
 
 * author: Nasy
-* date: Oct 13, 2017
-* update: Oct 15, 2017
+* date: Oct 15, 2017
 * email: sy_n@me.com
-* file: config.py
+* file: tools.py
 * license: MIT
 
 Copyright © 2017 by Nasy. All Rights Reserved.
 """
-from typing import Any, Dict
+import os
+
+from PIL import Image
+
+from config import settings
+
+SETTINGS = settings()
 
 
-def settings() -> Dict[str, Any]:
-    """Get settings."""
-    return {
-        "store": True,
-        "file": "./store.json",
-        "pages": 10,
-        "filter": {
-            "min_width": 1440,
-            "min_height": 0,
-            "min_w2h": 6 / 5,
-            "max_w2h": 3 / 1,
-            "tags": {"漫画"}
-        }
-    }
+def pic_filter() -> None:
+    """Filter pictures."""
+    pics = os.listdir("pictures")
+
+    def _filter(path: str) -> bool:
+        """Filter."""
+        pic = Image.open(f"pictures/{path}")
+        width, height = pic.size
+        if (width < SETTINGS["filter"]["min_width"] or
+                height < SETTINGS["filter"]["min_height"] or
+                width / height < SETTINGS["filter"]["min_w2h"] or
+                width / height > SETTINGS["filter"]["max_w2h"]):
+            return False
+        return True
+
+    left = map(_filter, pics)
+    for l, p in zip(left, pics):
+        if not l:
+            os.rename(f"pictures/{p}", f"pictures/n{p}")
+
+
+def main() -> None:
+    """Yooo main function."""
+    pic_filter()
+
+
+if __name__ == "__main__":
+    main()
