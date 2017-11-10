@@ -48,8 +48,8 @@ def settings() -> Dict[str, Any]:
         "filter": {
             "min_width": 1440,
             "min_height": 0,
-            "min_w2h": 6 / 5,
-            "max_w2h": 3 / 1,
-            "tags": {"漫画"}
+            "min_w2h": 6 / 5,  # Minimal width to height
+            "max_w2h": 3 / 1,  # Maximal width to height
+            "tags": {"漫画"}  # Tgas to exclude
         }
     }

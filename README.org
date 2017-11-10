@@ -1,0 +1,17 @@
+#+TITLE: README
+#+DATE: <2017-11-10 Fri>
+#+AUTHOR: Nasy
+#+EMAIL: nasyxx@gmail.com
+
+* Pixiv to Backgrounds
+
+Thanks to [[https://github.com/LoveLiveSunshine/pixiv.moe]], this project uses its API to crawl popularity sorted pictures to your desktop backgrounds.
+
+** How to use?
+
+Simply clone this project to your computer and then ~make~
+#+BEGIN_SOURCE
+git clone https://github.com/nasyxx/pixiv2bg.git ~/pixiv2bg && cd ~/pixiv2bg && make
+#+END_SOURCE
+
+You can change some configs in ~config.py~ easily or just directly modify the code. I think you must be very simple to understand the code.
