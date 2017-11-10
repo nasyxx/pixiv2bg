@@ -10,8 +10,11 @@ Thanks to [[https://github.com/LoveLiveSunshine/pixiv.moe]], this project uses i
 ** How to use?
 
 Simply clone this project to your computer and then ~make~
-#+BEGIN_SOURCE
+
+#+BEGIN_SRC bash
 git clone https://github.com/nasyxx/pixiv2bg.git ~/pixiv2bg && cd ~/pixiv2bg && make
-#+END_SOURCE
+#+END_SRC
+
+
 
 You can change some configs in ~config.py~ easily or just directly modify the code. I think you must be very simple to understand the code.
