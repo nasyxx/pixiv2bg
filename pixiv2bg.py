@@ -156,6 +156,10 @@ class Pixiv:
         self.loop.run_until_complete(asyncio.wait(self.fetchs))
         self.tqdm.close()
 
+        if not self.works:
+            print("Nothing to fetch!")
+            return
+
         print("Fetch urls finished!")
 
         self.tqdm = tqdm(total = len(self.works))
