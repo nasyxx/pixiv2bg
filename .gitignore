@@ -2,3 +2,5 @@ __pycache__
 pictures
 store.json
 .mypy_cache
+.ropeproject
+store.json.temp
