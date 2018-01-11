@@ -138,8 +138,15 @@ class Pixiv:
                             chunks = chunks + chunk
             except asyncio.TimeoutError:
                 self.stores.pop(workid)
-            with open((f"pictures/{title.replace('/','-')}."
-                       f"{url[-4:].split('.')[-1]}"), "wb") as f:
+            fname = f"{title.replace('/','-')}.{url[-4:].split('.')[-1]}"
+            n = 1
+            while fname in os.listdir("pictures/"):
+                fname = (
+                    f"{title.replace('/','-')}{n:03}."
+                    "{url[-4:].split('.')[-1]}"
+                )
+                n += 1
+            with open("pictures/" + fname, "wb") as f:
                 f.write(chunks)
             self.tqdm.update()
 
@@ -148,6 +155,8 @@ class Pixiv:
         self.tqdm = tqdm(total = 10)
         self.loop.run_until_complete(asyncio.wait(self.fetchs))
         self.tqdm.close()
+
+        print("Fetch urls finished!")
 
         self.tqdm = tqdm(total = len(self.works))
         self.loop.run_until_complete(asyncio.wait(self.works))
