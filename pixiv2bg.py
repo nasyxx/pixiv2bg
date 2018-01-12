@@ -138,14 +138,10 @@ class Pixiv:
                             chunks = chunks + chunk
             except asyncio.TimeoutError:
                 self.stores.pop(workid)
-            fname = f"{title.replace('/','-')}.{url[-4:].split('.')[-1]}"
-            n = 1
-            while fname in os.listdir("pictures/"):
-                fname = (
-                    f"{title.replace('/','-')}{n:03}."
-                    "{url[-4:].split('.')[-1]}"
-                )
-                n += 1
+            fname = (
+                f"{title.replace('/','-')} - {workid}."
+                f"{url[-4:].split('.')[-1]}"
+            )
             with open("pictures/" + fname, "wb") as f:
                 f.write(chunks)
             self.tqdm.update()
