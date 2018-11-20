@@ -28,12 +28,14 @@ Excited without bugs::
     |  ___|______|______|______|______|______|____
 
 * author: Nasy
-* date: Jan 11, 2018
-* email: echo bmFzeXh4QGdtYWlsLmNvbQo= | base64 -D
-* file: pixiv2bg.py
+* date: Jan 12, 2018
+* email: echo bmFzeXh4QGdtYWlsLmNvbQo= | base64 -d (or -D on macOS)
+* filename: pixiv2bg.py
+* Last modified time: Jul 13, 2018
 * license: MIT
 
-Copyright © 2017 by Nasy. All Rights Reserved.
+There are more things in heaven and earth, Horatio, than are dreamt.
+ --  From "Hamlet"
 """
 import asyncio
 import os
@@ -69,7 +71,7 @@ class Pixiv:
         self.sema = asyncio.Semaphore(5)
         self.works = []  # type: List[Awaitable[None]]
         self.fetchs = [
-            asyncio.ensure_future(self._fetch_page(p), loop = self.loop)
+            asyncio.ensure_future(self._fetch_page(p), loop=self.loop)
             for p in range(1, 11)
         ]
         self.stores = self._load()
@@ -82,30 +84,35 @@ class Pixiv:
         for tag in tags:
             if tag in SETTINGS["filter"]["tags"]:
                 return False
-        if (width < SETTINGS["filter"]["min_width"] or
-                height < SETTINGS["filter"]["min_height"] or
-                width / height < SETTINGS["filter"]["min_w2h"] or
-                width / height > SETTINGS["filter"]["max_w2h"]):
+        if (
+            width < SETTINGS["filter"]["min_width"]
+            or height < SETTINGS["filter"]["min_height"]
+            or width / height < SETTINGS["filter"]["min_w2h"]
+            or width / height > SETTINGS["filter"]["max_w2h"]
+        ):
             return False
         return True
 
     async def _fetch_page(self, page: int = 1) -> None:
         """Fetch pixiv.moe page."""
         async with aiohttp.ClientSession() as session:
-            async with session.get(URL + str(page),
-                                   proxy = "http://127.0.0.1:6152") as res:
+            async with session.get(
+                URL + str(page), proxy="http://127.0.0.1:6152"
+            ) as res:
                 content = await res.json()
                 if content.get("status") == "success":
                     work = content["response"]["works"]
                     await self._get_urls(work)
-                    self.tqdm.update()
+                    if self.tqdm:
+                        self.tqdm.update()
 
-    async def _get_urls(self, works) -> None:
+    async def _get_urls(self, works: Dict) -> None:
         """Get urls from works."""
         for illust in works:
-            if (((not self.stores) or
-                 str(illust["work"]["id"]) not in self.stores) and
-                    await self._illusts_filter(illust)):
+            if (
+                (not self.stores)
+                or str(illust["work"]["id"]) not in self.stores
+            ) and await self._illusts_filter(illust):
                 self.works.append(
                     asyncio.ensure_future(
                         self.fetch_illust(
@@ -123,8 +130,7 @@ class Pixiv:
             try:
                 async with self.sema:
                     async with session.get(
-                            url,
-                            proxy = "http://127.0.0.1:6152",
+                        url, proxy="http://127.0.0.1:6152"
                     ) as res:
                         try:
                             os.mkdir("pictures")
@@ -138,17 +144,28 @@ class Pixiv:
                             chunks = chunks + chunk
             except asyncio.TimeoutError:
                 self.stores.pop(workid)
+                print(workid, "failed")
+            except aiohttp.client_exceptions.ClientConnectorError:
+                self.stores.pop(workid)
+                print(workid, "failed")
+            except aiohttp.client_exceptions.ClientHttpProxyError:
+                self.stores.pop(workid)
+                print(workid, "failed")
             fname = (
                 f"{title.replace('/','-')} - {workid}."
                 f"{url[-4:].split('.')[-1]}"
             )
             with open("pictures/" + fname, "wb") as f:
-                f.write(chunks)
-            self.tqdm.update()
+                try:
+                    f.write(chunks)
+                except UnboundLocalError:
+                    print(workid, "failed")
+            if self.tqdm:
+                self.tqdm.update()
 
     def run(self) -> None:
         """Run this crawer."""
-        self.tqdm = tqdm(total = 10)
+        self.tqdm = tqdm(total=10)
         self.loop.run_until_complete(asyncio.wait(self.fetchs))
         self.tqdm.close()
 
@@ -158,7 +175,7 @@ class Pixiv:
 
         print("Fetch urls finished!")
 
-        self.tqdm = tqdm(total = len(self.works))
+        self.tqdm = tqdm(total=len(self.works))
         self.loop.run_until_complete(asyncio.wait(self.works))
         self.tqdm.close()
         with open(SETTINGS["file"] + ".temp", "w") as f:
