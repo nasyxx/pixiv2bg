@@ -37,15 +37,19 @@ Excited without bugs::
 There are more things in heaven and earth, Horatio, than are dreamt.
  --  From "Hamlet"
 """
-import asyncio
+# Standard Library
 import os
-from typing import Any, Awaitable, Dict, List, Optional
+import asyncio
+from typing import Any, Dict, List, Optional, Awaitable
 
+# Async Packages
 import aiohttp
-import uvloop
+
+# Other Packages
 from tqdm import tqdm
 
 import ujson as json
+import uvloop
 from config import settings
 
 assert Awaitable
@@ -138,7 +142,7 @@ class Pixiv:
                             pass
                         chunks = b""
                         while True:
-                            chunk = await res.content.read(128)
+                            chunk = await res.content.read(512)
                             if not chunk:
                                 break
                             chunks = chunks + chunk
@@ -149,6 +153,9 @@ class Pixiv:
                 self.stores.pop(workid)
                 print(workid, "failed")
             except aiohttp.client_exceptions.ClientHttpProxyError:
+                self.stores.pop(workid)
+                print(workid, "failed")
+            except aiohttp.client_exceptions.ClientPayloadError:
                 self.stores.pop(workid)
                 print(workid, "failed")
             fname = (
