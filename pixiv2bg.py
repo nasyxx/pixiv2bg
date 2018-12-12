@@ -158,6 +158,9 @@ class Pixiv:
             except aiohttp.client_exceptions.ClientPayloadError:
                 self.stores.pop(workid)
                 print(workid, "failed")
+            except aiohttp.client_exceptions.ServerDisconnectedError:
+                self.stores.pop(workid)
+                print(workid, "failed")
             fname = (
                 f"{title.replace('/','-')} - {workid}."
                 f"{url[-4:].split('.')[-1]}"
