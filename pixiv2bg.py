@@ -46,10 +46,10 @@ from typing import Any, Dict, List, Optional, Awaitable
 import aiohttp
 
 # Other Packages
+import uvloop
 from tqdm import tqdm
 
 import ujson as json
-import uvloop
 from config import settings
 
 assert Awaitable
