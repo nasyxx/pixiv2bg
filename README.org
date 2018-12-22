@@ -1,5 +1,6 @@
 #+TITLE: README
 #+DATE: <2017-11-10 Fri>
+#+UPDATE: <2018-12-22 Sat>
 #+AUTHOR: Nasy
 #+EMAIL: nasyxx@gmail.com
 
@@ -12,9 +13,7 @@ Thanks to [[https://github.com/LoveLiveSunshine/pixiv.moe]], this project uses i
 Simply clone this project to your computer and then ~make~
 
 #+BEGIN_SRC bash
-git clone https://github.com/nasyxx/pixiv2bg.git ~/pixiv2bg && cd ~/pixiv2bg && make
+  git clone https://github.com/nasyxx/pixiv2bg.git ~/pixiv2bg && cd ~/pixiv2bg && poetry install && poetry run python3 pixiv2bg.py && poetry run python3 pixiv2bg.py && poetry run python3 pixiv2bg.py && poetry run python3 pixiv2bg.py
 #+END_SRC
-
-
 
 You can change some configs in ~config.py~ easily or just directly modify the code. I think it is effortless that you can understand the code.
