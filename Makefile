@@ -1,5 +1,6 @@
 open:
 	open likes
+	open /Users/Nasy/Documents/中二文件夹？/Pictures/Terminal\ BG
 	open pictures
 
 all: run
